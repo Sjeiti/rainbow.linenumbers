@@ -4,13 +4,13 @@
  * Set the pre color in CSS for the number color.
  * Set the pre border-color in CSS for the line color.
  * Set the starting line number by adding data-line="234" attribute to code element.
+ * Disable line numbering by setting data-line="-1"
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @namespace Rainbow.linenumbers
  * @requires Rainbow.js
  */
 if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (function(Rainbow){
-	var drawNumbers = true
-		,drawLines = true
+	var drawLines = true
 		,iLineHeight
 		,iCharWidth
 	;
@@ -18,7 +18,8 @@ if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (f
 		var toInt = parseInt
 			,iLines = block.innerHTML.replace(/\r\n|\r/g,"\n").split("\n").length
 			,iLineStart = block.getAttribute('data-line')<<0
-			,iChars = iLines===0?1:(Math.log(iLines+iLineStart)/2.303<<0)+1 // 2.302585092994046 safely rounded to 2.303
+			,drawNumbers = iLineStart>=0
+			,iChars = iLines===0?1:(Math.log(iLines)/2.303<<0)+1 // 2.302585092994046 safely rounded to 2.303
 			,i = iLines
 			// <pre>
 			,mParent = block.parentNode
