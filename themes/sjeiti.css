@@ -1,0 +1,88 @@
+@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+/**
+ * Sjeiti theme
+ *
+ * Theme for testing line numbering
+ *
+ * @author Ron Valstar <ron@sjeiti.com>
+ * @version 1.0
+ */
+pre {
+  position: relative;
+  padding: 15px;
+  background: #222;
+  overflow: auto;
+  margin-bottom: 20px;
+  font: 12px / 15px Inconsolata, courier, monospace;
+  /*&:before{
+		    content:'// file: 'attr(data-file);
+		    position:absolute;
+		    top:-@lineHeight;
+		    left:0;
+		    padding:2px @lineHeight 0;
+		    background:#222;
+		    color:#FC2;
+			.cornerRounded(@lineHeight @lineHeight 0 0);
+	    }*/
+
+}
+pre code.rainbow {
+  position: static;
+  color: #fff;
+  word-wrap: break-word;
+  /*.constant { color: #458383; }*/
+
+  /*.storage { color: #EC7600; }*/
+
+  /*.string.regexp, .support.tag.script, .support.tag.style { color: #008; }*/
+
+  /*.integer { color: #38C; }*/
+
+  /*.support { color: #C3352E; }*/
+
+  /*.variable.global, .variable.class, .variable.instance { color: #83C; }*/
+
+}
+pre code.rainbow .line {
+  color: #666;
+  left: -7.5px;
+}
+pre code.rainbow .line:after {
+  border-bottom: 1px solid #333;
+  width: 1024px;
+}
+pre code.rainbow.rb2 .line {
+  color: #999;
+}
+pre code.rainbow.rb2 .line:after {
+  border-bottom: none;
+}
+pre code.rainbow .comment {
+  color: #FC2;
+}
+pre code.rainbow .string,
+pre code.rainbow .comment.docstring {
+  color: #9C6;
+}
+pre code.rainbow .keyword,
+pre code.rainbow .selector {
+  color: #89A;
+}
+pre code.rainbow .inherited-class {
+  font-style: italic;
+}
+pre code.rainbow .entity {
+  color: #A98;
+}
+pre code.rainbow .function.name {
+  color: #97B;
+}
+pre code.rainbow .numeric {
+  color: #38C;
+}
+pre code.rainbow .property {
+  color: #9A8;
+}
+pre code.rainbow .operator {
+  color: #C83;
+}

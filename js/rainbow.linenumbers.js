@@ -1,104 +1,75 @@
-
 /**
- * Adds lines and numbers to the pre element.
- * Set the pre color in CSS for the number color.
- * Set the pre border-color in CSS for the line color.
+ * Adds lines and numbers to the code element by adding a span.line at each newline.
  * Set the starting line number by adding data-line="234" attribute to code element.
  * Disable line numbering by setting data-line="-1"
+ * Each span.line has an id so you can easily jump to a specific line using and anchor href like #rb1ln30 (meaning rainbow block 1 line 30)
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @namespace Rainbow.linenumbers
+ * @license http://www.apache.org/licenses/LICENSE-2.0
  * @requires Rainbow.js
  */
 if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (function(Rainbow){
-	var drawLines = true
-		,iLineHeight
-		,iCharWidth
-	;
+	var iBlock = 0;
+	// add generic .line style
+	var mGenericLineStyle = document.createElement('style');
+	mGenericLineStyle.innerText = 'pre code.rainbow .line { position: relative; padding-right: 10px; }'
+	+'pre code.rainbow .line:before{ display: inline-block; text-align: right; }'
+	+'pre code.rainbow .line:after{ content:\'\'; position: absolute; left: 0; bottom: 0; }';
+	document.head.appendChild(mGenericLineStyle);
+	// handle each code block
 	Rainbow.onHighlight(function(block) {
+		iBlock++;
 		var toInt = parseInt
-			,iLines = block.innerHTML.replace(/\r\n|\r/g,"\n").split("\n").length
-			,iLineStart = block.getAttribute('data-line')<<0
+			,rxLineMatch = /\r\n|\r|\n/g
+			,iLines = block.innerHTML.replace(rxLineMatch,"\n").split("\n").length
+			,iLineStart = block.getAttribute('data-line')<<0||1
 			,drawNumbers = iLineStart>=0
-			,iChars = iLines===0?1:(Math.log(iLines)/2.303<<0)+1 // 2.302585092994046 safely rounded to 2.303
-			,i = iLines
+			,sBlockId = 'rb'+iBlock
 			// <pre>
-			,mParent = block.parentNode
-			,bPre = mParent.nodeName=='PRE'
+			,mBlockParent = block.parentNode
 			// get <code>- and <pre> styles
 			,getStyle = function(el){return el.currentStyle||(document.defaultView&&document.defaultView.getComputedStyle(el,null))||el.style}
-			,oCodeStyle = getStyle(block)
-			,oParentStyle = getStyle(mParent)
-			,iTop = toInt(oParentStyle.paddingTop)+toInt(oCodeStyle.marginTop)+toInt(oCodeStyle.paddingTop)
-			// numbers canvas
-			,mCnvNumbers = document.createElement('canvas')
-			,oCtxNumbers = mCnvNumbers.getContext('2d')
-			// lines canvas
-			,mCnvLines = document.createElement('canvas')
-			,oCtxLines = mCnvLines.getContext('2d')
+			//
+			,iCharWidth = calculateCharacterWidth()
+			,iLineBlockWidth = String(iLineStart+iLines-1).length*iCharWidth
+			//
+			// style
+			,sStyle = 'pre code.rainbow.'+sBlockId+' .line:before{ width: '+iLineBlockWidth+'px; }'
 		;
-		/*var N="\n";console.log(
-		 N,'iLineHeight',iLineHeight
-		 ,N,'lineHeight',oCodeStyle.lineHeight
-		 ,N,'fontSize',oCodeStyle.fontSize
-		 ,N,'fontFamily',oCodeStyle.fontFamily
-		 ,N,'font',oCodeStyle.font
-		 ,N,'borderColor',oParentStyle.borderColor
-		 ,N,'oCodeStyle',oCodeStyle.wordWrap
-		 );*/ // log
-		// measure character dimensions
-		if (isNaN(iCharWidth)) {
+		function calculateCharacterWidth(){
 			var iTestExp = 5
 				,mTestDiv = document.createElement('div')
 				,oTestStyle = mTestDiv.style
+				,oCodeStyle = getStyle(block)
 				,oTestCSS = {font:oCodeStyle.font,width:'auto',display:'inline-block'}
+				,iReturnWidth
 			;
 			mTestDiv.appendChild(document.createTextNode(new Array(1<<iTestExp).join('a')+'a'));
 			for (var s in oTestCSS) oTestStyle[s] = oTestCSS[s];
 			document.body.appendChild(mTestDiv);
-			iCharWidth = mTestDiv.offsetWidth>>iTestExp;
-			iLineHeight = toInt(oCodeStyle.lineHeight)
-			if (isNaN(iLineHeight)) iLineHeight = mTestDiv.offsetHeight; // for line-height: normal;
+			iReturnWidth = mTestDiv.offsetWidth>>iTestExp;
 			document.body.removeChild(mTestDiv);
+			return iReturnWidth;
 		}
-		// draw numbers canvas
-		mCnvNumbers.setAttribute('width',iChars*iCharWidth);
-		mCnvNumbers.setAttribute('height',(1+iLines)*iLineHeight);
-		oCtxNumbers.font = oCodeStyle.fontSize+' '+oCodeStyle.fontFamily;
-		oCtxNumbers.fillStyle = oParentStyle.color;
-		oCtxNumbers.textBaseline = 'bottom';
-		while (i--) {
-			var iLnNr = iLines-i;
-			oCtxNumbers.fillText((iLineStart+iLnNr-1)+'',0,iLnNr*iLineHeight);
+		// add line numbers as <span id="rbln-32"></span> to be able to link to a specific line
+		function getLine(nr){
+			var sId = sBlockId+'ln'+nr;
+			sStyle += '#'+sId+':before{content:\''+nr+'\';}';
+			return '<span id="'+sId+'" class="line"></span>';
 		}
-		// draw lines canvas
-		mCnvLines.setAttribute('width',1);
-		mCnvLines.setAttribute('height',iLineHeight);
-		oCtxLines.fillStyle = oParentStyle.borderColor;
-		oCtxLines.fillRect(0,iLineHeight-1,1,1);
-		// msg if wordwrapping is set
-		if (oCodeStyle.wordWrap!='normal'&&console&&console.warn) console.warn('rainbow.linenumbers: For correct linenumbers wordwrapping should be set to normal.');
-		/*
-		// adjust existing styles
-		block.style.wordWrap = 'normal';
-		block.style.display = 'inline-block';
-		block.style.width = '100%';
-		block.style.overflowX = 'auto';
-		mParent.style.overflowX = 'auto';
-		*/
-		// add images to <pre> background
-		if (bPre) {
-			// starting with the original background... then prepend lines and numbers
-			var sBackground = oParentStyle.backgroundColor;
-			if (drawLines) sBackground = 'url('+mCnvLines.toDataURL()+') 0 '+iTop+'px,'+sBackground;
-			if (drawNumbers) {
-				sBackground = 'url('+mCnvNumbers.toDataURL()+') '+iCharWidth+'px '+iTop+'px no-repeat,'+sBackground;
-				// indenting the <pre> (indenting <code> messes up tabbing)
-				mParent.style.paddingLeft = (parseInt(oParentStyle.paddingLeft)+iCharWidth*(iChars+1))+'px'
-			}
-			// adding background style to <pre> (again: adding it to <code> creates a mess)
-			mParent.style.background = sBackground;
+		if (drawNumbers) {
+			var iLine = iLineStart
+				,sBlock = getLine(iLineStart)+block.innerHTML.replace(rxLineMatch,function(match){
+					return match+getLine(++iLine);
+				})
+			;
+			var mStyle = document.createElement('style');
+			mStyle.innerText = sStyle;
+			mBlockParent.parentNode.insertBefore(mStyle, mBlockParent);
+			block.innerHTML = sBlock;
+			block.classList.add(sBlockId);
 		}
 	});
 	// return something so as not to run again if accidentally included twice
-	return {toString:function(){return '[Object Rainbow.linenumbers]'}}
+	return {toString:function(){return '[object Rainbow.linenumbers]'}}
 })(window.Rainbow);
