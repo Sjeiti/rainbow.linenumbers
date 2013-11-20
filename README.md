@@ -1,6 +1,6 @@
 # Rainbow.linenumbers
 
-A plugin for [Rainbow](http://rainbowco.de) to show linenumbers.
+A plugin for [Rainbow](http://rainbowco.de) to show linenumbers.<br/>
 Adds line numbering to the code element by adding a span.line at each newline.
 
 ## Instructions
@@ -9,14 +9,14 @@ Just include Rainbow.linenumbers.js alongside Rainbow.js
 
 ### usage
 
-Set the starting line number by adding ```data-line="234"``` attribute to code element.
+Set the starting line number by adding ```data-line="234"``` attribute to code element.<br/>
 Disable line numbering by setting ```data-line="-1"```
 
 ### styling
 
-Edit styles and colors by overriding the css:
-```pre code.rainbow .line``` <-- the main element
-```pre code.rainbow .line:before``` <-- the actual number
+Edit styles and colors by overriding the css:<br/>
+```pre code.rainbow .line``` <-- the main element<br/>
+```pre code.rainbow .line:before``` <-- the actual number<br/>
 ```pre code.rainbow .line:after``` <-- the underline
 
 ### hyperlinking
