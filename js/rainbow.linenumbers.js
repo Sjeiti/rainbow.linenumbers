@@ -13,7 +13,7 @@ if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (f
 	// add generic .line style
 	var mGenericLineStyle = document.createElement('style');
 	mGenericLineStyle.innerText = 'pre code.rainbow .line { position: relative; padding-right: 10px; }'
-	+'pre code.rainbow .line:before{ display: inline-block; text-align: right; }'
+	+'pre code.rainbow .line:before{ content: attr(data-line); display: inline-block; text-align: right; }'
 	+'pre code.rainbow .line:after{ content:\'\'; position: absolute; left: 0; bottom: 0; }';
 	document.head.appendChild(mGenericLineStyle);
 	// handle each code block
@@ -54,8 +54,7 @@ if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (f
 		// add line numbers as <span id="rbln-32"></span> to be able to link to a specific line
 		function getLine(nr){
 			var sId = sBlockId+'ln'+nr;
-			sStyle += '#'+sId+':before{content:\''+nr+'\';}';
-			return '<span id="'+sId+'" class="line"></span>';
+			return '<span id="'+sId+'" class="line" data-line="'+nr+'"></span>';
 		}
 		if (drawNumbers) {
 			var iLine = iLineStart
@@ -63,10 +62,12 @@ if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (f
 					return match+getLine(++iLine);
 				})
 			;
+			// add style element
 			var mStyle = document.createElement('style');
 			mStyle.innerText = sStyle;
 			mBlockParent.parentNode.insertBefore(mStyle, mBlockParent);
 			block.innerHTML = sBlock;
+			// add class to block
 			block.classList.add(sBlockId);
 		}
 	});
