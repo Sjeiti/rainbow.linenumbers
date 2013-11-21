@@ -11,51 +11,57 @@ pre {
   position: relative;
   padding: 15px;
   background: #222;
-  overflow: auto;
+  z-index: -2;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
   margin-bottom: 20px;
   font: 12px / 15px Inconsolata, courier, monospace;
-  /*&:before{
-		    content:'// file: 'attr(data-file);
-		    position:absolute;
-		    top:-@lineHeight;
-		    left:0;
-		    padding:2px @lineHeight 0;
-		    background:#222;
-		    color:#FC2;
-			.cornerRounded(@lineHeight @lineHeight 0 0);
-	    }*/
-
 }
 pre code.rainbow {
+  display: block;
+  min-width: 100%;
   position: static;
   color: #fff;
   word-wrap: break-word;
-  /*.constant { color: #458383; }*/
-
-  /*.storage { color: #EC7600; }*/
-
-  /*.string.regexp, .support.tag.script, .support.tag.style { color: #008; }*/
-
-  /*.integer { color: #38C; }*/
-
-  /*.support { color: #C3352E; }*/
-
-  /*.variable.global, .variable.class, .variable.instance { color: #83C; }*/
-
 }
 pre code.rainbow .line {
   color: #666;
-  left: -7.5px;
 }
 pre code.rainbow .line:after {
   border-bottom: 1px solid #333;
-  width: 1024px;
+  z-index: -1;
+}
+pre code.rainbow.rb1 {
+  display: inline;
 }
 pre code.rainbow.rb2 .line {
   color: #999;
 }
 pre code.rainbow.rb2 .line:after {
   border-bottom: none;
+}
+pre code.rainbow #rb2ln6:before,
+pre code.rainbow #rb2ln7:before,
+pre code.rainbow #rb2ln8:before {
+  color: yellow;
+}
+pre code.rainbow #rb2ln6:after,
+pre code.rainbow #rb2ln7:after,
+pre code.rainbow #rb2ln8:after {
+  height: 100%;
+  background-color: rgba(255, 255, 0, 0.1);
+}
+pre code.rainbow #rb4ln1233:before {
+  background-color: yellow;
+}
+pre code.rainbow #rb4ln1233:after {
+  height: 100%;
+  background-color: rgba(255, 255, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 0, 0.5);
 }
 pre code.rainbow .comment {
   color: #FC2;
