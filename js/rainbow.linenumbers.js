@@ -15,7 +15,7 @@ if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (f
 	// add generic .line style
 	var mGenericLineStyle = document.createElement('style');
 	mGenericLineStyle.appendChild(document.createTextNode('pre code.rainbow .line { position: relative; padding-right: 10px; }'
-			+'pre code.rainbow .line:before{ content: attr(data-line); display: inline-block; text-align: right; }'
+			+'pre code.rainbow .line:before{ content: attr(data-line); display: inline-block; text-align: right; white-space: nowrap; }'
 			+'pre code.rainbow .line:after{ content:\'\'; position: absolute; left: 0; bottom: 0; }'));
 	document.head.appendChild(mGenericLineStyle);
 	//
