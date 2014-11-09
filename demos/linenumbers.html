@@ -79,5 +79,42 @@ function _attr(el, attr) {
 		<script src="../js/rainbow.linenumbers.js"></script>
 		<script src="../js/language/generic.js"></script>
 		<script src="../js/language/javascript.js"></script>
+		<script>
+			(function(oXHR){
+				if (XMLHttpRequest!==undefined) {
+					oXHR = new XMLHttpRequest();
+					oXHR.addEventListener('readystatechange',handleReadyStateChange);
+					oXHR.open('GET','../js/rainbow.linenumbers.js',true);
+					oXHR.send();
+				}
+				function handleReadyStateChange(){
+					if (oXHR.readyState===4) {
+						if (oXHR.status!==200&&oXHR.status!==304) {
+							errorCallback('HTTP error ' + oXHR.status); // todo: check error stati and flow
+						} else {
+//							console.log('oXHR.result',oXHR.response); // log
+							//<pre><code data-language="javascript" data-line="1223">
+							var mPre = document.createElement('pre')
+								,mCode = document.createElement('code')
+							;
+							mCode.textContent = oXHR.response;
+							mCode.classList.add('rainbow');
+							mCode.classList.add('xhr');
+							mPre.appendChild(mCode);
+							document.body.appendChild(mPre);
+							setTimeout(function(){
+								Rainbow.color(parseLTGT(oXHR.response),'javascript',function(code){
+									mCode.innerHTML = code;
+									window.Rainbow.linenumbers(mCode);
+								});
+							},111);
+						}
+					}
+				}
+				function parseLTGT(s) {
+					return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/[\r]/g,'');
+				}
+			})();
+		</script>
 	</body>
 </html>

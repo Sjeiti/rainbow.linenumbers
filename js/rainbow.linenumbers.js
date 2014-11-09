@@ -3,90 +3,125 @@
  * Set the starting line number by adding data-line="234" attribute to code element.
  * Disable line numbering by setting data-line="-1"
  * Each span.line has an id so you can easily jump to a specific line using and anchor href like #rb1ln30 (meaning rainbow block 1 line 30)
+ * @summary Line numbering for Rainbow.js
+ * @version 1.1.2
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @namespace Rainbow.linenumbers
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @requires Rainbow.js
  */
 if (window.Rainbow&&!window.Rainbow.linenumbers) window.Rainbow.linenumbers = (function(Rainbow){
-	// line numbering starts at 1 so it is more logical to start counting blocks at 1 as well
-	var iBlock = 0;
-	//
+	var iCodeElement = 0
+		,mGenericLineStyle = document.createElement('style')
+	;
 	// add generic .line style
-	var mGenericLineStyle = document.createElement('style');
 	mGenericLineStyle.appendChild(document.createTextNode('pre code.rainbow .line { position: relative; padding-right: 10px; }'
-			+'pre code.rainbow .line:before{ content: attr(data-line); display: inline-block; text-align: right; white-space: nowrap; }'
-			+'pre code.rainbow .line:after{ content:\'\'; position: absolute; left: 0; bottom: 0; }'));
+		+'pre code.rainbow .line:before{ content: attr(data-line); display: inline-block; text-align: right; white-space: nowrap; }'
+		+'pre code.rainbow .line:after{ content:\'\'; position: absolute; left: 0; bottom: 0; }'));
 	document.head.appendChild(mGenericLineStyle);
 	//
 	// handle each code block
-	Rainbow.onHighlight(function(block) {
-		iBlock++;
+	Rainbow.onHighlight(addLines);
+
+	/**
+	 * Add lines to a <code> element
+	 * @param {HTMLElement} codeElement
+	 */
+	function addLines(codeElement){
+		iCodeElement++;
 		var rxLineMatch = /\r\n|\r|\n/g
-			,iLines = block.innerHTML.replace(rxLineMatch,"\n").split("\n").length
-			,iLineStart = block.getAttribute('data-line')<<0||1
+			,iLines = codeElement.innerHTML.replace(rxLineMatch,"\n").split("\n").length
+			,iLineStart = codeElement.getAttribute('data-line')<<0||1
 			,bAddLineNumbering = iLineStart>=0
-			,sBlockId = 'rb'+iBlock
-			,mBlockParent = block.parentNode // pre
+			,sBlockId = 'rb'+iCodeElement
+			,mParent = codeElement.parentNode // pre
 			//
-			,iCharWidth = calculateCharacterWidth()
+			,iCharWidth = calculateCharacterWidth(codeElement)
 			,iLineBlockWidth = 1 + String(iLineStart+iLines-1).length*iCharWidth
+			//
+			,iLine
+			,sBlock
+			//
+			,mStyle
 		;
 		if (bAddLineNumbering) {
-			var iLine = iLineStart
-				,sBlock = getLine(iLineStart)+block.innerHTML.replace(rxLineMatch,function(match){
-					return match+getLine(++iLine);
-				})
-			;
+			iLine = iLineStart;
+			sBlock = getLine(sBlockId,iLineStart)+codeElement.innerHTML.replace(rxLineMatch,function(match){
+				return match+getLine(sBlockId,++iLine);
+			});
 			//
 			// add class to block
-			block.classList.add(sBlockId);
-			if (getStyle(block).display==='block') {
+			codeElement.classList.add(sBlockId);
+			if (getStyle(codeElement).display==='block') {
 				window.addEventListener('resize', handleResize, false);
 			}
 			//
 			// add style element
-			var mStyle = document.createElement('style')
-				,mStyleContent = document.createTextNode('');
+			mStyle = document.createElement('style');
 			handleResize();
-			mStyle.appendChild(mStyleContent);
-			mBlockParent.parentNode.insertBefore(mStyle, mBlockParent);
+			mParent.parentNode.insertBefore(mStyle, mParent);
 			//
 			// set block html
-			block.innerHTML = sBlock;
-		}
-		// add line numbers as <span id="rb1ln32"></span> to be able to link to a specific line
-		function getLine(nr){
-			var sId = sBlockId+'ln'+nr;
-			return '<span id="'+sId+'" class="line" data-line="'+nr+'"></span>';
+			codeElement.innerHTML = sBlock;
 		}
 		function handleResize(){
-			setBlockStyle(block.offsetWidth);
+			setBlockStyle(mStyle,sBlockId,iLineBlockWidth,codeElement.offsetWidth);
 		}
-		function setBlockStyle(lineWidth) {
-			mStyleContent.nodeValue = 'pre code.rainbow.'+sBlockId+' .line:before{ width: '+iLineBlockWidth+'px; }'
-								+'pre code.rainbow.'+sBlockId+' .line:after{ width:'+(lineWidth||0)+'px }';
-		}
-		// calculate character width to determine the size of the .line element
-		function calculateCharacterWidth(){
-			var iTestExp = 5
-				,mTestDiv = document.createElement('div')
-				,oTestStyle = mTestDiv.style
-				,oCodeStyle = getStyle(block)
-				,oTestCSS = {font:oCodeStyle.font,width:'auto',display:'inline-block'}
-				,iReturnWidth
-			;
-			mTestDiv.appendChild(document.createTextNode(new Array(1<<iTestExp).join('a')+'a'));
-			for (var s in oTestCSS) oTestStyle[s] = oTestCSS[s];
-			document.body.appendChild(mTestDiv);
-			iReturnWidth = mTestDiv.offsetWidth>>iTestExp;
-			document.body.removeChild(mTestDiv);
-			return iReturnWidth;
-		}
-		function getStyle(el){
-			return el.currentStyle||(document.defaultView&&document.defaultView.getComputedStyle(el,null))||el.style;
-		}
-	});
-	// return something so as not to run again if accidentally included twice
-	return {toString:function(){return '[object Rainbow.linenumbers]'}}
+	}
+
+	/**
+	 * Add line numbers as <span id="rb1ln32"></span> to be able to link to a specific line.
+	 * @param {string} blockID
+	 * @param {number} nr
+	 * @returns {string}
+	 */
+	function getLine(blockID,nr){
+		var sId = blockID+'ln'+nr;
+		return '<span id="'+sId+'" class="line" data-line="'+nr+'"></span>';
+	}
+
+	/**
+	 *
+	 * @param {HTMLElement} elm
+	 * @param {string} blockID
+	 * @param {number} lineBlockWidth
+	 * @param {number} lineWidth
+	 */
+	function setBlockStyle(elm,blockID,lineBlockWidth,lineWidth) {
+		elm.textContent = 'pre code.rainbow.'+blockID+' .line:before{ width: '+lineBlockWidth+'px; }'
+			+'pre code.rainbow.'+blockID+' .line:after{ width:'+(lineWidth||0)+'px }';
+	}
+
+	/**
+	 * Calculate character width to determine the size of the .line element.
+	 * @param {HTMLElement} elm
+	 * @returns {number}
+	 */
+	function calculateCharacterWidth(elm){
+		var iTestExp = 5
+			,mTestDiv = document.createElement('div')
+			,oTestStyle = mTestDiv.style
+			,oCodeStyle = getStyle(elm)
+			,oTestCSS = {font:oCodeStyle.font,width:'auto',display:'inline-block'}
+			,iReturnWidth
+		;
+		mTestDiv.appendChild(document.createTextNode(new Array(1<<iTestExp).join('a')+'a'));
+		for (var s in oTestCSS) oTestStyle[s] = oTestCSS[s];
+		document.body.appendChild(mTestDiv);
+		iReturnWidth = mTestDiv.offsetWidth>>iTestExp;
+		document.body.removeChild(mTestDiv);
+		return iReturnWidth;
+	}
+
+	/**
+	 * Get the style of an element.
+	 * @param {HTMLElement} elm
+	 * @returns {IEElementStyle|DocumentView|CssStyle|CSSStyleDeclaration}
+	 */
+	function getStyle(elm){
+		return elm.currentStyle||(document.defaultView&&document.defaultView.getComputedStyle(elm,null))||elm.style;
+	}
+
+	// expose main method te be able to be called manually
+	return addLines;
 })(window.Rainbow);
