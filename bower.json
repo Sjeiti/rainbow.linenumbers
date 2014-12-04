@@ -1,0 +1,22 @@
+{
+	"name": "rainbow.linenumbers",
+	"version": "1.1.2",
+	"main": "src/rainbow.linenumbers.js",
+	"license": "MIT",
+	"ignore": [
+		"**/.*",
+		"*.md",
+		"Gruntfile.js",
+		"package.json"
+	],
+	"dependencies": {
+	},
+	"devDependencies": {},
+	"keywords": [
+		"rainbow",
+		"rainbowjs",
+		"line",
+		"numbering",
+		"linenumbers"
+	]
+}
